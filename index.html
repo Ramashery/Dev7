@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Romaha Dev Agency — Web Development, Design &amp; SEO in Tbilisi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<!--
+  "Neue Montreal" is a paid Pangram Pangram typeface — it isn't hosted on
+  any free font CDN, so it can't be pulled in via a <link> tag. Drop your
+  licensed webfont files somewhere on the site and point this @font-face
+  at them (woff2 preferred) to have --type below resolve to the real font.
+  Until then the stack below falls back to Inter at weight 800, which is
+  the closest free Extrabold grotesque available.
+-->
+<style>
+  @font-face{
+    font-family: 'Neue Montreal';
+    src: url('/fonts/NeueMontreal-Bold.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+  }
+  :root{
+    --bg: #000000;
+    --bg-deep: #000000;
+    --ink: #f3f1ec;
+    --ink-dim: rgba(243,241,236,0.6);
+    --ink-faint: rgba(243,241,236,0.34);
+    --accent: #7fa6c2;
+    --line: rgba(243,241,236,0.16);
+    --line-strong: rgba(243,241,236,0.28);
+    --type: 'Neue Montreal', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html, body{
+    height: 100%;
+    overflow: hidden; /* native scroll disabled — heavy inertial scroll drives the page */
+  }
+
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--type);
+    font-weight: 800;
+    line-height: 1.15;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+
+  /* ============================================================
+     HEAVY SCROLL — fixed container moved with an eased transform
+     instead of native scrolling (see script at the bottom).
+     ============================================================ */
+  #scroll-container{
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    will-change: transform;
+  }
+
+  a{ color:inherit; text-decoration:none; }
+  img,video{ display:block; max-width:100%; }
+
+  :focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .wrap{
+    max-width: 1360px;
+    margin: 0 auto;
+    padding-left: clamp(20px, 5vw, 64px);
+    padding-right: clamp(20px, 5vw, 64px);
+  }
+
+  /* ============================================================
+     MENU PLATE — floating pill with logo + burger, expands into panel
+     ============================================================ */
+  .ll-plate{
+    position: fixed;
+    top: clamp(16px, 3.6vw, 28px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 900;
+
+    width: calc(100vw - 2rem);
+    max-width: 438px;
+
+    display: flex;
+    flex-direction: column;
+
+    background: rgba(23,24,26,.6);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    border-radius: 4px;
+    overflow: hidden;
+
+    color: var(--ink);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: .625rem;
+    font-weight: 500;
+    letter-spacing: -.02em;
+    text-transform: uppercase;
+    line-height: 1.8;
+
+    opacity: 0;
+    transition: opacity .4s ease;
+  }
+  .ll-plate.is-ready{ opacity: 1; }
+
+  .ll-plate__row{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    padding-left: 9px;
+    padding-right: 13px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ll-plate__logo{
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    text-decoration: none;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  .ll-plate__logo:hover{ transform: scale(1.06); opacity: .85; }
+  .ll-plate__logo img{
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .ll-plate__message{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100% - 7rem);
+    text-align: center;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: .85;
+  }
+  .ll-plate__message span{
+    display: inline-block;
+    animation: llMsgFade .5s ease;
+  }
+  @keyframes llMsgFade{
+    from{ opacity: 0; transform: translateY(4px); }
+    to  { opacity: 1; transform: translateY(0); }
+  }
+
+  .ll-plate__burger{
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 12px 7px;
+    flex-shrink: 0;
+  }
+  .ll-plate__burger span{
+    display: block;
+    width: 16px;
+    height: 2px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  .ll-plate.is-open .ll-plate__burger span:nth-child(1){ transform: translateY(5px) rotate(45deg); }
+  .ll-plate.is-open .ll-plate__burger span:nth-child(2){ opacity: 0; }
+  .ll-plate.is-open .ll-plate__burger span:nth-child(3){ transform: translateY(-5px) rotate(-45deg); }
+
+  /* ---- expanding panel ---- */
+  .ll-panel{
+    overflow: hidden;
+    height: 0;
+    transition: height .38s cubic-bezier(.65,0,.35,1);
+    background: rgba(23,24,26,.6);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  .ll-panel__inner{ padding-bottom: 13px; }
+
+  .ll-panel__item{
+    all: unset;
+    cursor: pointer;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 50px;
+    padding: 0 2rem;
+    position: relative;
+    color: var(--ink);
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: -.02em;
+    line-height: 1.4;
+    text-transform: none;
+    transition: background .15s ease;
+  }
+  .ll-panel__item:hover{ background: rgba(255,255,255,.1); }
+  .ll-panel__item::before{
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 1px;
+    background: currentColor;
+    opacity: .1;
+    pointer-events: none;
+  }
+
+  .ll-panel__pitch{
+    display: block;
+    box-sizing: border-box;
+    margin: 13px;
+    margin-bottom: 6px;
+    padding: 14px;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid rgba(243,241,236,.2);
+    border-radius: 4px;
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .625rem;
+    font-weight: 500;
+    letter-spacing: -.02em;
+    text-transform: uppercase;
+    line-height: 1.8;
+    transition: background .18s ease, color .18s ease, border-color .18s ease;
+  }
+  .ll-panel__pitch:hover{
+    background: var(--ink);
+    color: #17181a;
+    border-color: var(--ink);
+  }
+
+  .ll-panel__actions{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    padding: 6px 13px 0;
+  }
+  .ll-panel__btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .625rem;
+    font-weight: 500;
+    letter-spacing: -.02em;
+    text-transform: uppercase;
+    line-height: 1.8;
+    transition: transform .15s ease, background .18s ease, color .18s ease;
+  }
+  .ll-panel__btn--solid{ background: var(--ink); color: #17181a; }
+  .ll-panel__btn--solid:hover{ transform: translateY(-1px); }
+  .ll-panel__btn--ghost{ background: rgba(255,255,255,.1); color: var(--ink); }
+  .ll-panel__btn--ghost:hover{ background: rgba(255,255,255,.2); }
+
+  @media (max-width: 480px){
+    .ll-plate{ width: calc(100vw - 1.5rem); }
+    .ll-plate__logo{ width: 32px; height: 32px; }
+    .ll-panel__item{ font-size: .9375rem; padding: 0 1.25rem; }
+    .ll-panel__actions{ padding: 6px 10px 0; }
+  }
+
+  /* (grain/scanline overlay removed per request — no horizontal noise) */
+
+  /* (old fullscreen nav + mega-menu styles removed — replaced by .ll-plate above) */
+
+  /* ============================================================
+     HERO
+     ============================================================ */
+  .hero{
+    position: relative;
+    height: 100svh;
+    min-height: 620px;
+    display:flex;
+    align-items:flex-end;
+    overflow:hidden;
+  }
+
+  .bg-video-wrap{
+    position: absolute;
+    top:0; left:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    z-index:0;
+    background:#000000;
+  }
+
+  .bg-video-wrap video{
+    position:absolute;
+    top:50%; left:50%;
+    min-width:100%;
+    min-height:100%;
+    width:auto; height:auto;
+    transform: translate(-50%,-50%);
+    object-fit:cover;
+    filter: grayscale(35%) contrast(1.05);
+    transition: opacity 1.2s ease-in-out;
+    opacity:0;
+  }
+  .bg-video-wrap video.bg-video-active{ opacity: 0.55; }
+
+  @media (min-width: 1024px){
+    .bg-video-wrap video{
+      width: 100vh;
+      height: 100vw;
+      min-width:0;
+      min-height:0;
+      transform: translate(-50%,-50%) rotate(90deg);
+    }
+  }
+
+  .hero__scrim{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.2) 40%, var(--bg-deep) 96%);
+    z-index:1;
+  }
+
+  .hero__content{
+    position:relative;
+    z-index:2;
+    width:100%;
+    padding-bottom: clamp(48px, 7vw, 88px);
+    padding-top: 170px;
+  }
+
+
+  .hero__eyebrow{
+    font-size: 19.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+
+  .hero__title{
+    font-weight: 800;
+    font-size: clamp(26px, 4.6vw, 44px);
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    max-width: 20ch;
+    text-wrap: balance;
+  }
+
+  @media (min-width: 1024px){
+    .hero__title{ font-size: clamp(15px, 2.2vw, 26px); max-width: 32ch; }
+  }
+
+  .hero__divider{
+    margin-top: clamp(28px, 5vw, 44px);
+    margin-bottom: clamp(24px, 4vw, 36px);
+    border-top: 1px solid var(--line-strong);
+    width: 100%;
+  }
+
+  .hero__footer-row{
+    display:flex;
+    justify-content:flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .hero__footer-col{ max-width: 46ch; text-align:left; }
+  .hero__footer-col--right{ width: 50%; }
+
+  .hero__footer-label{
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+
+  .hero__footer-text{
+    font-size: 12.3px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink);
+    line-height: 1.15;
+  }
+
+  .hero__contact-row{
+    margin-top: clamp(22px, 4vw, 34px);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  .hero__contact-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width: 60px;
+    height: 38px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--bg-deep);
+    font-size: 19px;
+    transition: transform .2s ease, opacity .2s ease;
+  }
+  .hero__contact-btn:hover{ transform: translateX(3px); opacity: 0.9; }
+
+  .hero__sub{
+    max-width: 48ch;
+    font-size: clamp(19px, 1.9vw, 22px);
+    color: var(--ink-dim);
+    line-height: 1.15;
+  }
+
+  .hero__ctas{
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .link{
+    font-size: 21px;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+    border-bottom: 1px solid var(--line-strong);
+    padding-bottom: 3px;
+    transition: border-color .2s ease, color .2s ease;
+  }
+  .link:hover{ border-color: var(--accent); color: var(--accent); }
+
+  /* ============================================================
+     SECTION SCAFFOLD — dossier grid
+     ============================================================ */
+  .section{
+    background: var(--bg-deep);
+    padding: clamp(64px, 9vw, 120px) 0;
+  }
+
+  .section--tone{
+    background: #000000;
+  }
+
+  .section__head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap: 20px;
+    margin-bottom: clamp(40px, 6vw, 72px);
+    flex-wrap:wrap;
+  }
+
+  .section__index{
+    font-size: 19.5px;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+
+  .section__title{
+    font-weight: 800;
+    font-size: clamp(22px, 2.6vw, 32px);
+    letter-spacing: -0.01em;
+  }
+
+  .dossier{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 clamp(24px, 3vw, 48px);
+  }
+
+  .dossier__label{
+    grid-column: 1 / 2;
+    font-size: 19.5px;
+    line-height: 1.15;
+    color: var(--ink-faint);
+    padding-top: 4px;
+  }
+  .dossier__label b{ color: var(--ink-dim); font-weight: 800; display:block; margin-bottom: 8px; }
+
+  .dossier__content{
+    grid-column: 2 / 5;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(28px, 3vw, 48px);
+  }
+
+  /* ---- Media composition: square + two flanking accent blocks ----
+     Desktop: one flattened 4-col grid — row1 = label|card1|card2|card3,
+     row2 = accent-left|square(spans card1+card2 cols)|accent-right.
+     accent-left's fine vertical alignment to the label text (and the
+     square/accent-right's position relative to it) is computed in JS
+     via --shift-* custom properties, since it depends on the label's
+     rendered text height. Mobile redefines the areas entirely. */
+  .dossier--services,
+  .dossier--why,
+  .dossier--process{
+    grid-template-areas:
+      "label card1 card2 card3"
+      "accl  sq    sq    accr";
+    row-gap: clamp(28px, 3vw, 48px);
+    margin-bottom: var(--comp-bottom-space, 0px);
+  }
+  .dossier--services .dossier__label,
+  .dossier--why .dossier__label,
+  .dossier--process .dossier__label{ grid-area: label; }
+
+  /* Task-specific: enlarge the "Core capabilities" / "Positioning" labels
+     by 1.5x, tighten line-height to 0.9, and let them stretch across the
+     leftmost column plus the next one on desktop (grid stays intact —
+     card1/card2/card3 keep their own grid-area placement). */
+  .dossier--services .dossier__label b,
+  .dossier--why .dossier__label b,
+  .dossier--process .dossier__label b,
+  .dossier--services .dossier__label-text,
+  .dossier--why .dossier__label-text,
+  .dossier--process .dossier__label-text{
+    font-size: 1.5em;
+    line-height: 0.9;
+  }
+  @media (min-width: 1024px){
+    .dossier--services .dossier__label,
+    .dossier--why .dossier__label,
+    .dossier--process .dossier__label{ grid-column: 1 / 3; }
+  }
+  .dossier--services .ga-card1,
+  .dossier--why .ga-card1,
+  .dossier--process .ga-card1{ grid-area: card1; }
+  .dossier--services .ga-card2,
+  .dossier--why .ga-card2,
+  .dossier--process .ga-card2{ grid-area: card2; }
+  .dossier--services .ga-card3,
+  .dossier--why .ga-card3,
+  .dossier--process .ga-card3{ grid-area: card3; }
+
+  .media-block{
+    grid-area: sq;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #1c1d1f;
+    scale: calc(.5 + var(--progress-square, 0) * .5);
+    translate: 0 var(--shift-square, 0px);
+  }
+
+  .media-accent{
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 2;
+    overflow: hidden;
+    background: #1c1d1f;
+  }
+
+  /* ---- Parallax frame: video sits taller than its window and is
+     nudged up/down by the scroll engine below, exposing new footage
+     at the edges instead of just sitting still inside the crop. ---- */
+  .media-window__frame{
+    position: absolute;
+    left: 0; right: 0;
+    top: -10%; bottom: -10%;
+    will-change: transform;
+  }
+  .media-window__video{
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .media-accent--left{
+    grid-area: accl;
+    scale: calc(.5 + var(--progress-left, 0) * .5);
+    translate:
+      calc(-1 * clamp(24px, 2.6vw, 48px) * (1 - var(--progress-left, 0)))
+      calc(var(--shift-left, 0px) + clamp(90px, 9vw, 170px) * (1 - var(--progress-left, 0)));
+  }
+
+  .media-accent--right{
+    grid-area: accr;
+    align-self: start;
+    scale: calc(.5 + var(--progress-right, 0) * .5);
+    translate:
+      calc(clamp(24px, 2.6vw, 48px) * (1 - var(--progress-right, 0)))
+      calc(var(--shift-right, 0px) - clamp(90px, 9vw, 170px) * (1 - var(--progress-right, 0)));
+  }
+
+  .card{
+    padding-left: clamp(20px, 2vw, 28px);
+    border-left: 1px solid var(--line);
+  }
+
+  /* ---- 01_Services & 02_Why: the "01" and "03" text columns are pulled
+     down to sit just above the square / right rectangle at their
+     resting (max-scale) size, instead of top-aligned with "02" and
+     the label. JS computes --shift-card1/--shift-card3 from the
+     media boxes' own final shifted position (see align() below), so
+     this tracks their real layout instead of a guessed value. ---- */
+  @media (min-width: 1024px){
+    .dossier--services .ga-card1,
+    .dossier--why .ga-card1,
+    .dossier--process .ga-card1{ translate: 0 var(--shift-card1, 0px); }
+    .dossier--services .ga-card3,
+    .dossier--why .ga-card3,
+    .dossier--process .ga-card3{ translate: 0 var(--shift-card3, 0px); }
+  }
+
+  .card__num{
+    font-size: 18px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display:block;
+  }
+
+  .card__title{
+    font-weight: 800;
+    font-size: 18px;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .card__text{
+    color: var(--ink-dim);
+    font-size: 21.75px;
+    line-height: 1.15;
+  }
+
+  /* ---- Scroll-jacked reveal video (01_SERVICES) ----
+     Hidden by default; grown open by JS via --reveal-progress, which
+     the heavy-scroll engine drives instead of the page position until
+     it reaches 1 (see handleScrollInput in the script below). Sized
+     and positioned separately for mobile (below 861px) and desktop
+     (861px and up), since the two layouts place it differently. ---- */
+  .services-reveal{ display:none; }
+
+  /* process gets a stacked look since order matters */
+  .process-item + .process-item{ margin-top: 30px; padding-top: 30px; border-top: 1px solid var(--line); }
+  .process-item{ border-left: none; padding-left: 0; }
+  .process-item .card__num{ margin-bottom: 10px; }
+
+  /* ============================================================
+     CLOSING
+     ============================================================ */
+  .closing{
+    background: var(--bg-deep);
+    padding: clamp(80px, 12vw, 150px) 0;
+  }
+
+  .closing__title{
+    font-weight: 800;
+    font-size: clamp(28px, 4.4vw, 50px);
+    line-height: 1.12;
+    max-width: 18ch;
+    letter-spacing: -0.01em;
+  }
+
+  .closing__sub{
+    margin-top: 22px;
+    max-width: 46ch;
+    color: var(--ink-dim);
+    font-size: 23.25px;
+    line-height: 1.15;
+  }
+
+  .closing .link{ margin-top: 36px; display:inline-block; }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  .footer{
+    position: relative;
+    background: #000000;
+    padding: 44px 0 32px;
+    overflow: hidden;
+  }
+  .footer__bg-video{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(35%) contrast(1.05);
+    opacity: 0.4;
+    z-index: 0;
+  }
+  .footer__scrim{
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.8) 100%);
+    z-index: 1;
+  }
+  .footer > .wrap{
+    position: relative;
+    z-index: 2;
+  }
+  .footer__top{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap: 24px;
+    padding-bottom: 28px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .footer__nav{
+    display:flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .footer__nav a{
+    font-size: 19.5px;
+    letter-spacing: 0.02em;
+    color: var(--ink-dim);
+    transition: color .2s ease;
+  }
+  .footer__nav a:hover{ color: var(--accent); }
+  .footer__contacts{
+    display:flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .footer__contacts a{
+    font-size: 19.5px;
+    letter-spacing: 0.02em;
+    color: var(--ink-dim);
+    transition: color .2s ease;
+  }
+  .footer__contacts a:hover{ color: var(--accent); }
+  .footer__row{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    gap: 16px;
+    font-size: 18.75px;
+    color: var(--ink-faint);
+  }
+  .footer__row a{ color: var(--ink-dim); }
+  .footer__row a:hover{ color: var(--accent); }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 860px){
+    .dossier{ grid-template-columns: 1fr; }
+    .dossier__label{ grid-column: 1; margin-bottom: 20px; }
+    .dossier__content{ grid-column: 1; grid-template-columns: 1fr; gap: 32px; }
+    .dossier--services,
+    .dossier--why,
+    .dossier--process{
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "label label"
+        "card1 ."
+        "accl  accr"
+        "card2 card3"
+        "sq    sq";
+      row-gap: 24px;
+      column-gap: 16px;
+    }
+    .dossier--services .ga-card2,
+    .dossier--why .ga-card2,
+    .dossier--process .ga-card2,
+    .dossier--services .ga-card3,
+    .dossier--why .ga-card3,
+    .dossier--process .ga-card3{ border-top: none; padding-top: 0; }
+    .dossier--services .card__title,
+    .dossier--why .card__title,
+    .dossier--process .card__title{ font-size: calc(18px / 1.3); }
+    .dossier--services .card__text,
+    .dossier--why .card__text,
+    .dossier--process .card__text{ font-size: calc(21.75px / 1.3); line-height: 0.9; }
+    .media-block{ margin-top: 4px; }
+
+    .media-accent--left{
+      translate:
+        calc(-1 * clamp(46px, 13vw, 84px) * (1 - var(--progress-left, 0)))
+        calc(var(--shift-left, 0px) + clamp(64px, 17vw, 120px) * (1 - var(--progress-left, 0)));
+    }
+    .media-accent--right{
+      translate:
+        calc(clamp(46px, 13vw, 84px) * (1 - var(--progress-right, 0)))
+        calc(var(--shift-right, 0px) - clamp(64px, 17vw, 120px) * (1 - var(--progress-right, 0)));
+    }
+    .card{ border-left: none; padding-left: 0; border-top: 1px solid var(--line); padding-top: 24px; }
+    .card:first-child{ border-top: none; padding-top: 0; }
+    .section__head{ flex-direction:column; align-items:flex-start; gap: 10px; }
+
+    /* ---- Services reveal video: sits on the RIGHT side of the label/
+       card1 row (negative z-index inside the isolated .wrap stacking
+       context keeps it clear of the page's other stacking, but still
+       behind the label/card1 text, which stay in normal flow on top of
+       it). Fixed box, top pinned right under the hero at the section's
+       own top padding — same "harmonious" gap every other section
+       opens with. Width and right offset are computed with the exact
+       same formula as the accl/accr grid columns (wrap's own side
+       padding + the 16px column-gap), and height uses the same
+       aspect-ratio: 1/2 as every other vertical accent video, so once
+       fully open it occupies exactly the same footprint as they do —
+       no side cropping, no mismatched box. No background is painted on
+       the box itself — only the video (scaled from 0) is ever visible,
+       so nothing marks the spot before it opens. The video scales up
+       from 0 anchored at its TOP-right corner as --reveal-progress
+       goes 0 → 1, so the growth starts high (right under the hero) and
+       unfolds downward, rather than growing up from the bottom. It
+       fills its box exactly like the other accent videos fill theirs
+       (object-fit: cover, no letterboxing). ---- */
+    #services .wrap{ position: relative; isolation: isolate; }
+    .services-reveal{
+      display: block;
+      position: absolute;
+      top: 0;
+      right: clamp(20px, 5vw, 64px);
+      left: auto;
+      width: calc((100% - (2 * clamp(20px, 5vw, 64px)) - 16px) / 2);
+      aspect-ratio: 1 / 2;
+      overflow: hidden;
+      background: transparent;
+      z-index: -1;
+      pointer-events: none;
+    }
+    .services-reveal video{
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: top right;
+      transform: scale(var(--reveal-progress, 0));
+      will-change: transform;
+    }
+
+    /* ---- Label letters assemble in step with the video reveal ----
+       Each character of the "Core capabilities" heading and its
+       description is wrapped (by JS, splitIntoChars) in its own span
+       with a random --char-random. While --reveal-progress runs 0→1
+       (the exact same value driving the video's scale, inherited here
+       from #services) each letter eases in from a small random offset
+       and fades up to full opacity, so the paragraph visibly "assembles"
+       at the same pace the video grows — and, since both read the same
+       live variable, scrolling back up un-assembles it again too. ---- */
+    #services .dossier__label .-s-word{ display: inline-block; }
+    #services .dossier__label .-s-char{
+      display: inline-block;
+      will-change: transform, opacity;
+      opacity: calc(0.1 + var(--reveal-progress, 0) * 0.9);
+      translate:
+        calc(var(--char-random, 0) * 4.8px * (1 - var(--reveal-progress, 0)))
+        calc(var(--char-random, 0) * 7.8px * (1 - var(--reveal-progress, 0)));
+    }
+  }
+
+  /* ---- Desktop version of the same reveal: video grows from its
+     top-right corner right under the "What we build" heading, with a
+     small harmonious gap under the title text (computed by JS into
+     --reveal-top-offset, see updateRevealTopOffset) rather than sitting
+     flush with the whole dossier grid — that kept the fully-open video
+     tall enough to run into card3's paragraph below it. Positioned
+     relative to the section's .wrap (same shared stacking context as
+     the mobile version, isolated + z-index:-1) so it always paints
+     behind ALL of the section's text, including the heading itself,
+     not just the dossier's own children. Width matches the real accr
+     column exactly (one of the 4 equal dossier columns, same
+     column-gap and the wrap's own side padding), so once open it lines
+     up with every other accent video. The label paragraph assembles in
+     step with it here too, reusing the same JS-split spans and CSS as
+     the mobile version above. ---- */
+  @media (min-width: 861px){
+    #services .wrap{ position: relative; isolation: isolate; }
+    .services-reveal{
+      display: block;
+      position: absolute;
+      top: var(--reveal-top-offset, 0px);
+      right: clamp(20px, 5vw, 64px);
+      left: auto;
+      width: calc((100% - (2 * clamp(20px, 5vw, 64px)) - (3 * clamp(24px, 3vw, 48px))) / 4);
+      aspect-ratio: 1 / 2;
+      overflow: hidden;
+      background: transparent;
+      z-index: -1;
+      pointer-events: none;
+    }
+    .services-reveal video{
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: top right;
+      transform: scale(var(--reveal-progress, 0));
+      will-change: transform;
+    }
+    #services .dossier__label .-s-word{ display: inline-block; }
+    #services .dossier__label .-s-char{
+      display: inline-block;
+      will-change: transform, opacity;
+      opacity: calc(0.1 + var(--reveal-progress, 0) * 0.9);
+      translate:
+        calc(var(--char-random, 0) * 4.8px * (1 - var(--reveal-progress, 0)))
+        calc(var(--char-random, 0) * 7.8px * (1 - var(--reveal-progress, 0)));
+    }
+  }
+
+
+
+
+
+  /* ---- Adaptive label: letters keep their original colours, but any
+     letter that currently sits over a LIGHT part of the reveal video
+     gets .on-light from JS (updateAdaptive) and turns dark so it stays
+     readable. Falls back to a soft dark halo if the video can't be
+     sampled. ---- */
+  #services .dossier__label .-s-char{ transition: color .25s ease, text-shadow .25s ease; }
+  #services .dossier__label .-s-char.on-light{ color: rgba(10,10,12,.9); }
+  #services.no-sample .dossier__label .-s-char{ text-shadow: 0 0 6px rgba(0,0,0,.55), 0 0 14px rgba(0,0,0,.35); }
+</style>
+</head>
+<body>
+
+<!-- MENU PLATE -->
+<div class="ll-plate" id="llPlate">
+  <div class="ll-plate__row" id="llPlateRow">
+
+    <a href="#top" class="ll-plate__logo" aria-label="Romaha Dev Agency — home">
+      <img
+        src="https://i.postimg.cc/XY7vd1Q4/logo-merged-white-on-black-1-removebg-preview.png"
+        alt="Romaha logo"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high">
+    </a>
+
+    <div class="ll-plate__message" id="llPlateMessage">
+      <span>Let&rsquo;s build something</span>
+    </div>
+
+    <button class="ll-plate__burger" id="llBurger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <div class="ll-panel" id="llPanel">
+    <div class="ll-panel__inner">
+      <a class="ll-panel__item" href="#top">Index</a>
+      <a class="ll-panel__item" href="#services">Services</a>
+      <a class="ll-panel__item" href="#why">Work</a>
+      <a class="ll-panel__item" href="#process">Journal</a>
+      <a class="ll-panel__item" href="#process">About</a>
+
+      <a class="ll-panel__pitch" href="tel:+995591102653">+995 591 102 653</a>
+
+      <div class="ll-panel__actions">
+        <a class="ll-panel__btn ll-panel__btn--ghost" href="https://t.me/ramashery" target="_blank" rel="noopener">Telegram</a>
+        <a class="ll-panel__btn ll-panel__btn--solid" href="https://wa.me/995591102653" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- All scrollable page content lives inside this fixed, transform-driven
+     container — see the heavy-scroll engine at the bottom of the file. -->
+<div id="scroll-container">
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="bg-video-wrap">
+    <video
+      id="bgVideo"
+      muted
+      playsinline
+      preload="auto"
+      src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/x1.mp4"
+    ></video>
+  </div>
+  <div class="hero__scrim"></div>
+
+  <div class="hero__content wrap">
+    <h1 class="hero__title">Crafting high-performance websites that drive growth in Tbilisi and beyond</h1>
+    <div class="hero__divider"></div>
+
+    <div class="hero__footer-row">
+      <div class="hero__footer-col hero__footer-col--right">
+        <p class="hero__footer-label">Services</p>
+        <p class="hero__footer-text">Web Development</p>
+        <p class="hero__footer-text">UI/UX &amp; Design</p>
+        <p class="hero__footer-text">SEO</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SERVICES -->
+<section class="section" id="services">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="section__index">(01_SERVICES)</span>
+      <h2 class="section__title">What we build</h2>
+    </div>
+
+    <div class="dossier dossier--services">
+      <div class="services-reveal" aria-hidden="true">
+        <video class="services-reveal__video" crossorigin="anonymous" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/b13.mp4" autoplay muted loop playsinline preload="auto"></video>
+      </div>
+
+      <div class="dossier__label">
+        <b class="" style="text-transform:uppercase;">Core capabilities</b>
+        <span class="dossier__label-text" style="text-transform:uppercase;">Full-stack delivery, from first sketch to indexed, ranking page.</span>
+      </div>
+
+      <div class="card ga-card1">
+        <span class="card__num">01</span>
+        <h3 class="card__title">Custom Web Development</h3>
+        <p class="card__text">From lightning-fast landing pages to full-scale web applications, we craft clean, scalable, and secure web solutions tailored specifically to your business goals.</p>
+      </div>
+
+      <div class="media-accent media-accent--left" data-progress data-progress-var="--progress-left" data-progress-finish="38" data-parallax>
+        <div class="media-window__frame"><video class="media-window__video" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/b1.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+      </div>
+      <div class="media-accent media-accent--right" data-progress data-progress-var="--progress-right" data-progress-finish="0" data-parallax>
+        <div class="media-window__frame"><video class="media-window__video" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/b11.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+      </div>
+
+      <div class="card ga-card2">
+        <span class="card__num">02</span>
+        <h3 class="card__title">UI/UX &amp; Web Design</h3>
+        <p class="card__text">We design modern, interactive interfaces that deliver smooth user journeys, reflect your brand identity, and maximize user conversion rates.</p>
+      </div>
+
+      <div class="card ga-card3">
+        <span class="card__num">03</span>
+        <h3 class="card__title">Search Engine Optimization</h3>
+        <p class="card__text">Dominating local and international search results with robust technical SEO, page-speed performance engineering, and strategic keyword optimization.</p>
+      </div>
+
+      <figure class="media-block" data-progress data-progress-var="--progress-square" data-progress-finish="11" data-parallax>
+        <div class="media-window__frame"><video class="media-window__video" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/g1.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="section section--tone" id="why">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="section__index">(02_WHY.ROMAHA)</span>
+      <h2 class="section__title">Why Romaha Dev Agency</h2>
+    </div>
+
+    <div class="dossier dossier--why">
+      <div class="dossier__label">
+        <b class="" style="text-transform:uppercase;">Positioning</b>
+        <span class="dossier__label-text" style="text-transform:uppercase;">Local insight, engineered to a global standard.</span>
+      </div>
+
+      <div class="card ga-card1">
+        <span class="card__num">01</span>
+        <h3 class="card__title">Local Heart, Global Quality</h3>
+        <p class="card__text">Based in Tbilisi, Georgia, we bring together deep local market understanding and world-class digital standards to help your business stand out in competitive markets.</p>
+      </div>
+
+      <div class="media-accent media-accent--left" data-progress data-progress-var="--progress-left" data-progress-finish="38" data-parallax>
+        <div class="media-window__frame"><video class="media-window__video" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/b3.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+      </div>
+      <div class="media-accent media-accent--right" data-progress data-progress-var="--progress-right" data-progress-finish="0" data-parallax>
+        <div class="media-window__frame"><video class="media-window__video" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/d16.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+      </div>
+
+      <div class="card ga-card2">
+        <span class="card__num">02</span>
+        <h3 class="card__title">Built for Speed and Scalability</h3>
+        <p class="card__text">We skip bloated templates in favor of lightweight, custom architecture. Your site loads instantly, performs flawlessly on mobile, and ranks higher on Google.</p>
+      </div>
+
+      <div class="card ga-card3">
+        <span class="card__num">03</span>
+        <h3 class="card__title">Results-Driven Approach</h3>
+        <p class="card__text">A modern site must produce tangible results. Every layout, call-to-action, and line of code is engineered to increase engagement and drive revenue.</p>
+      </div>
+
+      <figure class="media-block" data-progress data-progress-var="--progress-square" data-progress-finish="11" data-parallax>
+        <div class="media-window__frame"><video class="media-window__video" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/v1.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="section" id="process">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="section__index">(03_PROCESS)</span>
+      <h2 class="section__title">How a project runs</h2>
+    </div>
+
+    <div class="dossier dossier--process">
+      <div class="dossier__label">
+        <b class="" style="text-transform:uppercase;">Sequence</b>
+        <span class="dossier__label-text" style="text-transform:uppercase;">Three stages, no detours.</span>
+      </div>
+
+      <div class="card ga-card1">
+        <span class="card__num">01</span>
+        <h3 class="card__title">Discovery &amp; Strategy</h3>
+        <p class="card__text">Analyzing your brand, audience, and market goals to build a clear roadmap.</p>
+      </div>
+
+      <div class="media-accent media-accent--left" data-progress data-progress-var="--progress-left" data-progress-finish="38" data-parallax>
+        <div class="media-window__frame"><video class="media-window__video" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/v4.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+      </div>
+      <div class="media-accent media-accent--right" data-progress data-progress-var="--progress-right" data-progress-finish="0" data-parallax>
+        <div class="media-window__frame"><video class="media-window__video" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/v8.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+      </div>
+
+      <div class="card ga-card2">
+        <span class="card__num">02</span>
+        <h3 class="card__title">Design &amp; Development</h3>
+        <p class="card__text">Building pixel-perfect interfaces and robust backend architectures.</p>
+      </div>
+
+      <div class="card ga-card3">
+        <span class="card__num">03</span>
+        <h3 class="card__title">SEO &amp; Launch</h3>
+        <p class="card__text">Testing, optimizing page performance, setting up indexation, and bringing your site live.</p>
+      </div>
+
+      <figure class="media-block" data-progress data-progress-var="--progress-square" data-progress-finish="11" data-parallax>
+        <div class="media-window__frame"><video class="media-window__video" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/t1.mp4" autoplay muted loop playsinline preload="auto"></video></div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <video class="footer__bg-video" src="https://raw.githubusercontent.com/Ramashery/Dev3/refs/heads/main/video/b2.mp4" autoplay muted loop playsinline preload="auto"></video>
+  <div class="footer__scrim"></div>
+  <div class="wrap">
+    <div class="footer__top">
+      <nav class="footer__nav">
+        <a href="#top">Index</a>
+        <a href="#services">Services</a>
+        <a href="#why">Work</a>
+        <a href="#process">Journal</a>
+        <a href="#process">About</a>
+      </nav>
+      <div class="footer__contacts">
+        <a href="https://t.me/ramashery" target="_blank" rel="noopener">Telegram</a>
+        <a href="https://wa.me/995591102653" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="tel:+995591102653">+995 591 102 653</a>
+      </div>
+    </div>
+    <div class="footer__row">
+      <span>Romaha Dev Agency — Tbilisi, Georgia</span>
+      <span><a href="mailto:hello@romahadev.agency">hello@romahadev.agency</a></span>
+      <span>© 2026 Romaha Dev</span>
+    </div>
+  </div>
+</footer>
+
+</div><!-- /#scroll-container -->
+
+<script>
+  // ============================================================
+  // Scroll progress engine — publishes a 0→1 CSS var per [data-progress]
+  // element as it travels through the viewport. CSS reads it via
+  // scale/translate for a continuous grow-in reveal. The page no longer
+  // fires native 'scroll' events (see the heavy-scroll engine below),
+  // so this just exposes an update function that engine calls every frame.
+  // ============================================================
+  window.__updateProgressVars = (function(){
+    function clamp(v){ return Math.min(1, Math.max(0, v)); }
+
+    function computeProgress(el, finishPct){
+      var rect = el.getBoundingClientRect();
+      var vh = window.innerHeight;
+      var finishY = (finishPct / 100) * vh; // element's top reaches this point → progress = 1
+      return clamp((vh - rect.top) / (vh - finishY));
+    }
+
+    var nodes = Array.prototype.slice.call(document.querySelectorAll('[data-progress]'));
+
+    return function update(){
+      nodes.forEach(function(el){
+        var varName = el.dataset.progressVar || '--progress';
+        var finishPct = parseFloat(el.dataset.progressFinish);
+        if(isNaN(finishPct)) finishPct = 25;
+        el.style.setProperty(varName, computeProgress(el, finishPct).toFixed(4));
+      });
+    };
+  })();
+
+  // ============================================================
+  // Services / Why-Romaha media alignment — computes static resting-position
+  // offsets (desktop only) so:
+  //   • accent-left's top sits a small gap below the label text
+  //   • the square's center aligns with accent-left's bottom
+  //   • accent-right's top aligns with the square's center
+  // These are separate from the scroll-progress entrance animation;
+  // both are combined in the CSS translate() for each element.
+  // ============================================================
+  (function(){
+    var GAP = 20;        // px, gap between label text and accent-left
+    var CARD_GAP = 28;   // px, gap between a shifted text column and the box below it
+
+    function align(root){
+      var label = root.querySelector('.dossier__label');
+      var accL = root.querySelector('.media-accent--left');
+      var accR = root.querySelector('.media-accent--right');
+      var square = root.querySelector('.media-block');
+      var card1 = root.querySelector('.ga-card1');
+      var card3 = root.querySelector('.ga-card3');
+      if(!label || !accL || !accR || !square) return;
+
+      var isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+      if(!isDesktop){
+        accL.style.setProperty('--shift-left', '0px');
+        accR.style.setProperty('--shift-right', '0px');
+        square.style.setProperty('--shift-square', '0px');
+        if(card1) card1.style.setProperty('--shift-card1', '0px');
+        if(card3) card3.style.setProperty('--shift-card3', '0px');
+        return;
+      }
+
+      // Reset before measuring so stale offsets don't skew the read.
+      accL.style.setProperty('--shift-left', '0px');
+      accR.style.setProperty('--shift-right', '0px');
+      square.style.setProperty('--shift-square', '0px');
+      if(card1) card1.style.setProperty('--shift-card1', '0px');
+      if(card3) card3.style.setProperty('--shift-card3', '0px');
+
+      // The entrance animation's own scale/translate (driven by
+      // --progress-*) is still live at measurement time and shifts/shrinks
+      // the boxes, which corrupts getBoundingClientRect(). Neutralize it
+      // on all three elements for the duration of the read, then restore,
+      // so we measure their true static (resting) layout position.
+      var els = [accL, accR, square];
+      var prevScale = els.map(function(el){ return el.style.scale; });
+      var prevTranslate = els.map(function(el){ return el.style.translate; });
+      els.forEach(function(el){
+        el.style.setProperty('scale', '1');
+        el.style.setProperty('translate', '0px 0px');
+      });
+
+      var labelBottom = label.getBoundingClientRect().bottom;
+      var accLRect = accL.getBoundingClientRect();
+      var shiftLeft = (labelBottom + GAP) - accLRect.top;
+
+      var newAccLBottom = accLRect.bottom + shiftLeft;
+
+      var sqRect = square.getBoundingClientRect();
+      var shiftSquare = (newAccLBottom - sqRect.height / 2) - sqRect.top;
+
+      var accRRect = accR.getBoundingClientRect();
+      var shiftRight = newAccLBottom - accRRect.top;
+
+      // "01" / "03" text columns: pull each down until its own bottom
+      // sits CARD_GAP above the top edge of the box it now sits over
+      // (the square's / accent-right's fully shifted, max-scale resting
+      // position, i.e. the same targets just computed above) — never up
+      // past its natural spot, so it can't ride up over the row above it.
+      if(card1){
+        var finalSquareTop = sqRect.top + shiftSquare;
+        var card1Rect = card1.getBoundingClientRect();
+        var shiftCard1 = Math.max(0, (finalSquareTop - CARD_GAP) - card1Rect.bottom);
+        card1.style.setProperty('--shift-card1', shiftCard1 + 'px');
+      }
+      if(card3){
+        var finalAccRTop = newAccLBottom;
+        var card3Rect = card3.getBoundingClientRect();
+        var shiftCard3 = Math.max(0, (finalAccRTop - CARD_GAP) - card3Rect.bottom);
+        card3.style.setProperty('--shift-card3', shiftCard3 + 'px');
+      }
+
+      // The shifted composition can extend past the grid's own natural
+      // (untransformed) bottom edge — translate repositions boxes
+      // visually but never changes the container's layout height, so
+      // without this the next section could sit underneath the shifted
+      // accent-right block. Reserve that overflow as real margin.
+      var naturalBottom = Math.max(accLRect.bottom, sqRect.bottom, accRRect.bottom);
+      var visualBottom = Math.max(
+        accLRect.bottom + shiftLeft,
+        sqRect.bottom + shiftSquare,
+        accRRect.bottom + shiftRight
+      );
+      var bottomOverflow = Math.max(0, visualBottom - naturalBottom);
+
+      // Restore the entrance transform now that measuring is done.
+      els.forEach(function(el, i){
+        el.style.scale = prevScale[i];
+        el.style.translate = prevTranslate[i];
+      });
+
+      accL.style.setProperty('--shift-left', shiftLeft + 'px');
+      square.style.setProperty('--shift-square', shiftSquare + 'px');
+      accR.style.setProperty('--shift-right', shiftRight + 'px');
+
+      var dossier = root.querySelector('.dossier--services, .dossier--why, .dossier--process');
+      if(dossier) dossier.style.setProperty('--comp-bottom-space', bottomOverflow + 'px');
+    }
+
+    function alignAll(){
+      ['#services', '#why', '#process'].forEach(function(sel){
+        var section = document.querySelector(sel);
+        if(section) align(section);
+      });
+    }
+
+    var resizeTimer;
+    function scheduleAlign(){
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(alignAll, 120);
+    }
+
+    window.addEventListener('load', alignAll);
+    window.addEventListener('resize', scheduleAlign);
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(alignAll); }
+    document.addEventListener('DOMContentLoaded', alignAll);
+  })();
+
+
+  // Menu plate + expanding panel
+  (function(){
+    var plate  = document.getElementById('llPlate');
+    var row    = document.getElementById('llPlateRow');
+    var panel  = document.getElementById('llPanel');
+    var burger = document.getElementById('llBurger');
+
+    function openPanel(){ panel.style.height = panel.scrollHeight + 'px'; }
+    function closePanel(){
+      panel.style.height = panel.scrollHeight + 'px';
+      requestAnimationFrame(function(){ panel.style.height = '0px'; });
+    }
+    function toggle(force){
+      var willOpen = (typeof force === 'boolean') ? force : !plate.classList.contains('is-open');
+      plate.classList.toggle('is-open', willOpen);
+      burger.setAttribute('aria-expanded', String(willOpen));
+      willOpen ? openPanel() : closePanel();
+    }
+
+    burger.addEventListener('click', function(e){ e.stopPropagation(); toggle(); });
+    row.addEventListener('click', function(e){
+      if (e.target.closest('a')) return;
+      toggle();
+    });
+    panel.querySelectorAll('a').forEach(function(a){
+      a.addEventListener('click', function(){ toggle(false); });
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && plate.classList.contains('is-open')) toggle(false);
+    });
+    document.addEventListener('click', function(e){
+      if (!plate.contains(e.target) && plate.classList.contains('is-open')) toggle(false);
+    });
+
+    if (document.readyState === 'complete'){
+      plate.classList.add('is-ready');
+    } else {
+      window.addEventListener('load', function(){ plate.classList.add('is-ready'); });
+    }
+
+    if (window.ResizeObserver){
+      var ro = new ResizeObserver(function(){
+        if (plate.classList.contains('is-open')){
+          panel.style.height = panel.scrollHeight + 'px';
+        }
+      });
+      ro.observe(panel);
+    }
+
+    var messages = ['Let\u2019s build something', 'Glad you\u2019re here', 'Ready when you are', 'Nice to see you'];
+    var msgEl = document.querySelector('#llPlateMessage span');
+    var mi = 0;
+    setInterval(function(){
+      mi = (mi + 1) % messages.length;
+      msgEl.style.animation = 'none';
+      void msgEl.offsetWidth;
+      msgEl.textContent = messages[mi];
+      msgEl.style.animation = '';
+    }, 4000);
+  })();
+
+
+  // Background video loop with fade
+  (function () {
+    var video = document.getElementById('bgVideo');
+    var FADE_DURATION = 1.2;
+    var PAUSE_DURATION = 1000;
+    var fadeStarted = false;
+
+    function playFromStart() {
+      video.currentTime = 0;
+      video.play();
+      requestAnimationFrame(function () {
+        video.classList.add('bg-video-active');
+      });
+    }
+
+    video.addEventListener('loadeddata', function () {
+      video.play();
+      requestAnimationFrame(function () {
+        video.classList.add('bg-video-active');
+      });
+    });
+
+    video.addEventListener('timeupdate', function () {
+      var timeLeft = video.duration - video.currentTime;
+      if (timeLeft <= FADE_DURATION && timeLeft > 0 && !fadeStarted) {
+        fadeStarted = true;
+        video.classList.remove('bg-video-active');
+      }
+    });
+
+    video.addEventListener('ended', function () {
+      video.pause();
+      video.classList.remove('bg-video-active');
+      fadeStarted = false;
+      setTimeout(function () {
+        playFromStart();
+      }, PAUSE_DURATION);
+    });
+  })();
+
+  // ============================================================
+  // HEAVY (inertial) SCROLL
+  // Native scrolling is disabled (html/body overflow:hidden). Instead,
+  // wheel/touch/key input moves a TARGET scroll value and #scroll-container
+  // eases toward it every frame via translate3d — the technique used by
+  // the "желаемый скролл" reference, tuned to the same weight as the
+  // site-wide engine in main.js and the even-heavier profile scroller in
+  // about.js: exponential easing normalized to elapsed time (dt), so it
+  // feels the same on a 60Hz and a 120Hz screen, plus device-pixel
+  // snapping so settled text doesn't shimmer. The same loop also drives
+  // the per-media parallax (желаемый парралакс) and the entrance
+  // scale-in (--progress-*), since those no longer get native scroll
+  // events either.
+  // ============================================================
+  (function(){
+    var scrollContainer = document.getElementById('scroll-container');
+    if(!scrollContainer) return;
+
+    var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+    var EASE_60 = reduceMotion ? 1 : 0.05; // share of the remaining distance covered per 60fps frame — lower = heavier/more viscous (about.js's own "viscous" profile scroller uses 0.04)
+    var TOUCH_GAIN = 1.6;                  // finger px -> target px, same weight as about.js's viscous scroller
+    var FLING_MS = 220, FLING_MIN = 0.1, FLING_MAX = 1300; // release velocity (px/ms) carries the target a little further
+
+    var targetScrollY = 0;
+    var currentScrollY = 0;
+    var maxScroll = 0;
+    var raf = null, last = 0;
+
+    function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+
+    function calculateDimensions(){
+      var contentHeight = scrollContainer.scrollHeight;
+      maxScroll = Math.max(0, contentHeight - window.innerHeight);
+      targetScrollY = clamp(targetScrollY, 0, maxScroll);
+      updateRevealLockStart();
+      updateRevealTopOffset();
+    }
+
+    // ---- Services (01) scroll-jacked video reveal ----
+    // On phones, once the "Core capabilities" label paragraph has fully
+    // scrolled into view (its bottom edge clears the bottom of the
+    // screen), further downward scroll input is captured to grow open a
+    // vertical video (behind the label, scaling up from its top-right
+    // corner, unfolding downward) instead of moving the page. On desktop
+    // the same thing happens once the dossier grid (i.e. right under the
+    // "What we build" heading) reaches the middle of the screen, and the
+    // video grows from its top-right corner there instead. Either way,
+    // the page only continues past the gate once the video has fully
+    // opened. Scrolling back up before it finishes shrinks it again and
+    // releases the page upward; scrolling up even after it's fully open
+    // shrinks it back too, and re-arms the gate. revealProgress is the
+    // raw gate value the scroll input drives directly; revealDisplay
+    // eases toward it every frame (see animate() below) so the growth
+    // itself always reads as a slightly slowed, smooth motion rather
+    // than jumping with the input. The box's size (width + aspect-ratio:
+    // 1/2, matching every other vertical accent video) is handled
+    // entirely in CSS — no JS sizing needed.
+    var revealEl = document.querySelector('.services-reveal');
+    var revealSection = document.getElementById('services');
+    var revealLabel = revealSection ? revealSection.querySelector('.dossier__label') : null;
+    var revealDossier = revealSection ? revealSection.querySelector('.dossier') : null;
+    var revealWrap = revealSection ? revealSection.querySelector('.wrap') : null;
+    var revealTitle = revealSection ? revealSection.querySelector('.section__title') : null;
+    var revealMQ = window.matchMedia('(max-width: 860px)');
+    var revealDesktopMQ = window.matchMedia('(min-width: 861px)');
+    var revealProgress = 0;
+    var revealDisplay = 0;
+    var revealCompleted = false;
+    var revealLockStart = 0;
+    var REVEAL_DISTANCE = 1840; // px of scroll input needed to fully open it (4x slower than original 460)
+    // Mobile only: how much earlier (in scroll terms) the gate engages,
+    // so the label's bottom edge sits this many px above the screen's
+    // bottom edge — i.e. a bit higher up on screen — at the moment the
+    // lock/reveal starts, instead of right when it touches the very
+    // bottom. ~2cm at typical mobile pixel density.
+    var MOBILE_REVEAL_START_OFFSET = 80;
+    var REVEAL_TITLE_GAP = 28; // px, harmonious gap kept between "What we build" and the video's top edge on desktop
+
+    // Splits an element's text into per-word / per-character spans (each
+    // char gets a random --char-random used below to scatter it) so the
+    // label paragraph can "assemble" itself in step with the video
+    // opening — same technique as a standalone letter-fly-in reveal,
+    // just driven by --reveal-progress instead of its own scroll math.
+    // Harmless outside the two reveal breakpoints above: the CSS that
+    // animates .-s-char only exists inside those media queries.
+    function splitIntoChars(el){
+      if(!el || el.__split) return;
+      el.__split = true;
+      var text = el.textContent;
+      el.textContent = '';
+      text.split(/(\s+)/).forEach(function(part){
+        if(part === '') return;
+        if(/^\s+$/.test(part)){
+          el.appendChild(document.createTextNode(part));
+          return;
+        }
+        var wordSpan = document.createElement('span');
+        wordSpan.className = '-s-word';
+        for(var i = 0; i < part.length; i++){
+          var charSpan = document.createElement('span');
+          charSpan.className = '-s-char';
+          charSpan.textContent = part[i];
+          charSpan.style.setProperty('--char-random', (Math.random() * 20 - 10).toFixed(3));
+          wordSpan.appendChild(charSpan);
+        }
+        el.appendChild(wordSpan);
+      });
+    }
+    if(revealLabel){
+      splitIntoChars(revealLabel.querySelector('b'));
+      splitIntoChars(revealLabel.querySelector('.dossier__label-text'));
+    }
+
+    // ---- Adaptive label colour over the reveal video ----
+    // The playing video is drawn (with the same object-fit:cover crop the
+    // box uses) into a tiny canvas a few times a second; each label
+    // letter's centre is mapped into that canvas and, if the pixels under
+    // it are bright, the letter gets .on-light (dark colour). If the
+    // browser blocks reading the video (CORS), it falls back to a dark
+    // halo via .no-sample instead.
+    var adaptVideo = revealEl ? revealEl.querySelector('video') : null;
+    var adaptChars = revealLabel ? Array.prototype.slice.call(revealLabel.querySelectorAll('.-s-char')) : [];
+    var AW = 24, AH = 48, LIGHT_ON = 0.52, LIGHT_OFF = 0.44;
+    var adaptCanvas = document.createElement('canvas');
+    adaptCanvas.width = AW; adaptCanvas.height = AH;
+    var adaptCtx = adaptCanvas.getContext('2d', { willReadFrequently: true });
+    var adaptBroken = false;
+
+    if(adaptVideo){
+      adaptVideo.addEventListener('error', function(){
+        // CORS-enabled load failed: reload without crossorigin so the video still plays.
+        if(adaptVideo.getAttribute('crossorigin') !== null){
+          adaptVideo.removeAttribute('crossorigin');
+          var src = adaptVideo.getAttribute('src');
+          adaptVideo.setAttribute('src', src);
+          adaptVideo.load();
+          var pp = adaptVideo.play(); if(pp && pp.catch) pp.catch(function(){});
+          adaptBroken = true;
+          if(revealSection) revealSection.classList.add('no-sample');
+        }
+      });
+    }
+
+    function updateAdaptive(){
+      if(!adaptVideo || !adaptChars.length || !revealEl) return;
+      var p = revealDisplay;
+      var active = revealActive() && p > 0.01 && adaptVideo.readyState >= 2 && !adaptBroken;
+      if(!active){
+        for(var i = 0; i < adaptChars.length; i++){
+          if(adaptChars[i].__light){ adaptChars[i].__light = false; adaptChars[i].classList.remove('on-light'); }
+        }
+        return;
+      }
+      var vw = adaptVideo.videoWidth, vh = adaptVideo.videoHeight;
+      if(!vw || !vh) return;
+      var boxAspect = AW / AH, vidAspect = vw / vh, sx = 0, sy = 0, sw = vw, sh = vh;
+      if(vidAspect > boxAspect){ sw = vh * boxAspect; sx = (vw - sw) / 2; }
+      else { sh = vw / boxAspect; sy = (vh - sh) / 2; }
+      var data;
+      try{
+        adaptCtx.drawImage(adaptVideo, sx, sy, sw, sh, 0, 0, AW, AH);
+        data = adaptCtx.getImageData(0, 0, AW, AH).data;
+      }catch(err){
+        adaptBroken = true;
+        if(revealSection) revealSection.classList.add('no-sample');
+        return;
+      }
+      var b = revealEl.getBoundingClientRect();
+      var x0 = b.right - b.width * p, y0 = b.top;
+      var visW = b.width * p, visH = b.height * p;
+      for(var j = 0; j < adaptChars.length; j++){
+        var el = adaptChars[j];
+        var r = el.getBoundingClientRect();
+        var cx = (r.left + r.right) / 2, cy = (r.top + r.bottom) / 2;
+        var light = false;
+        if(cx >= x0 && cx <= b.right && cy >= y0 && cy <= y0 + visH){
+          var u = Math.min(AW - 1, Math.max(0, Math.floor((cx - x0) / visW * AW)));
+          var v = Math.min(AH - 1, Math.max(0, Math.floor((cy - y0) / visH * AH)));
+          // average a small 3x3 neighbourhood for stability
+          var sum = 0, n = 0;
+          for(var dy = -1; dy <= 1; dy++){
+            for(var dx = -1; dx <= 1; dx++){
+              var uu = u + dx, vv = v + dy;
+              if(uu < 0 || vv < 0 || uu >= AW || vv >= AH) continue;
+              var k = (vv * AW + uu) * 4;
+              sum += (0.2126 * data[k] + 0.7152 * data[k + 1] + 0.0722 * data[k + 2]) / 255;
+              n++;
+            }
+          }
+          var lum = sum / n;
+          light = el.__light ? lum > LIGHT_OFF : lum > LIGHT_ON; // hysteresis
+        }
+        if(el.__light !== light){
+          el.__light = light;
+          el.classList.toggle('on-light', light);
+        }
+      }
+    }
+    setInterval(updateAdaptive, 110);
+
+    // The gate fires at a different reference point per breakpoint:
+    // - Desktop: once the dossier grid's top (right under "What we
+    //   build", where the reveal box's own top-right corner sits) has
+    //   scrolled up to the middle of the screen.
+    // - Mobile: once the label paragraph's bottom edge has cleared the
+    //   bottom of the screen (fully visible).
+    // getBoundingClientRect() is viewport-space; adding currentScrollY
+    // converts it to the same untransformed document-space coordinate
+    // that targetScrollY/currentScrollY use, so it stays correct no
+    // matter where the page is scrolled when this recalculates (on
+    // load, resize, and font-load).
+    function updateRevealLockStart(){
+      if(!revealSection) return;
+      if(revealDesktopMQ.matches && revealDossier){
+        var dRect = revealDossier.getBoundingClientRect();
+        var dossierDocTop = dRect.top + currentScrollY;
+        revealLockStart = dossierDocTop - window.innerHeight * 0.5;
+      } else if(revealLabel){
+        var rect = revealLabel.getBoundingClientRect();
+        var labelDocBottom = rect.bottom + currentScrollY;
+        revealLockStart = labelDocBottom - window.innerHeight + MOBILE_REVEAL_START_OFFSET;
+      } else {
+        revealLockStart = revealSection.offsetTop;
+      }
+    }
+
+    function revealActive(){
+      return !!revealEl && !!revealSection && (revealMQ.matches || revealDesktopMQ.matches);
+    }
+
+    // Desktop only: pulls the reveal box's top edge up close to the
+    // "What we build" heading (a fixed, harmonious gap under its text)
+    // instead of flush with the whole dossier grid — otherwise the box
+    // is tall enough, once fully open, to run down into card3's own
+    // paragraph. Written as a --reveal-top-offset custom property (a
+    // negative px value, since the title sits above the dossier) rather
+    // than a hardcoded number, so it keeps tracking the title's real
+    // rendered position at any viewport width and after any reflow.
+    function updateRevealTopOffset(){
+      if(!revealEl) return;
+      if(!revealDesktopMQ.matches || !revealWrap || !revealTitle){
+        revealEl.style.removeProperty('--reveal-top-offset');
+        return;
+      }
+      var titleBottom = revealTitle.getBoundingClientRect().bottom;
+      var wrapTop = revealWrap.getBoundingClientRect().top;
+      var offset = (titleBottom - wrapTop) + REVEAL_TITLE_GAP;
+      revealEl.style.setProperty('--reveal-top-offset', offset.toFixed(1) + 'px');
+    }
+
+    function setRevealProgress(p){
+      revealProgress = clamp(p, 0, 1);
+      kick();
+    }
+
+    function handleScrollInput(delta){
+      if(delta === 0) return;
+
+      if(revealActive()){
+        if(delta > 0 && !revealCompleted){
+          // scrolling down: first close the gap up to the gate normally...
+          var toGate = revealLockStart - targetScrollY;
+          if(toGate > 0){
+            var move = Math.min(delta, toGate);
+            targetScrollY = clamp(targetScrollY + move, 0, maxScroll);
+            delta -= move;
+          }
+          // ...then any leftover delta opens the video instead of the page.
+          if(delta > 0 && targetScrollY >= revealLockStart - 0.5){
+            var remaining = (1 - revealProgress) * REVEAL_DISTANCE;
+            var consume = Math.min(delta, remaining);
+            setRevealProgress(revealProgress + consume / REVEAL_DISTANCE);
+            delta -= consume;
+            if(revealProgress >= 1) revealCompleted = true;
+          }
+        } else if(delta < 0){
+          // scrolling up: shrink the video back before the page moves up —
+          // this runs even after the reveal has fully completed, so the
+          // gesture is reversible at any point, not just mid-way through.
+          if(revealProgress > 0 && targetScrollY <= revealLockStart + 0.5){
+            var remainingUp = revealProgress * REVEAL_DISTANCE;
+            var consumeUp = Math.min(-delta, remainingUp);
+            setRevealProgress(revealProgress - consumeUp / REVEAL_DISTANCE);
+            delta += consumeUp;
+            // dropping back below fully-open re-arms the gate so scrolling
+            // down again re-locks the page and grows the video back open.
+            if(revealProgress < 1) revealCompleted = false;
+          }
+        }
+      }
+
+      targetScrollY = clamp(targetScrollY + delta, 0, maxScroll);
+    }
+
+    // ---- Pull-down-to-reload, at the very top, on touch ----
+    // Real browser pull-to-refresh can't fire here: it needs the document
+    // itself to be the scroller, and html/body are overflow:hidden so this
+    // engine can drive #scroll-container instead. So the same gesture is
+    // rebuilt by hand: while already at the top, a downward drag rubber-
+    // bands the whole container a little (visual confirmation the pull
+    // registered) and past a threshold it reloads the page — release
+    // before the threshold and it springs back with no reload.
+    var PULL_THRESHOLD = 76;  // px of actual finger travel to trigger reload
+    var PULL_MAX = 130;       // px, visual cap on the rubber-band offset
+    var PULL_RESISTANCE = 0.5;
+    var pullOffset = 0, pullOffsetTarget = 0;
+    var pulling = false, pullStartY = 0, reloadTriggered = false;
+
+    // ---- Media parallax (mirrors the "желаемый парралакс" reference) ----
+    var mediaNodes = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]')).map(function(el){
+      return { el: el, frame: el.querySelector('.media-window__frame') };
+    }).filter(function(m){ return m.frame; });
+
+    var OVERFLOW_FRACTION = 0.2; // matches the 10%/10% top/bottom in CSS
+
+    function updateMediaParallax(){
+      var vh = window.innerHeight;
+      mediaNodes.forEach(function(m){
+        var rect = m.el.getBoundingClientRect();
+        var tt = 2 * ((rect.top + rect.height * 0.5) / vh - 0.5); // -1 → +1
+        var offsetY = -0.4 * OVERFLOW_FRACTION * rect.height * tt;
+        m.frame.style.transform = 'translate3d(0,' + offsetY.toFixed(2) + 'px,0)';
+      });
+    }
+
+    function kick(){ if(raf === null){ last = 0; raf = requestAnimationFrame(animate); } }
+
+    function animate(now){
+      var dt = last ? Math.min(50, now - last) : 16.667;
+      last = now;
+      var k = 1 - Math.pow(1 - EASE_60, dt / 16.667);
+
+      var diff = targetScrollY - currentScrollY;
+      if(Math.abs(diff) < 0.1) currentScrollY = targetScrollY; else currentScrollY += diff * k;
+
+      var pullDiff = pullOffsetTarget - pullOffset;
+      if(Math.abs(pullDiff) < 0.1) pullOffset = pullOffsetTarget; else pullOffset += pullDiff * k;
+
+      // Reveal video eases toward its gate-driven target a bit more
+      // slowly than the scroll itself (lower share per frame), so the
+      // growth always looks like a gentle unfold rather than tracking
+      // the finger/wheel 1:1.
+      var revealDiff = revealProgress - revealDisplay;
+      if(Math.abs(revealDiff) < 0.0015) revealDisplay = revealProgress; else revealDisplay += revealDiff * (k * 0.6);
+      if(revealEl) revealEl.style.setProperty('--reveal-progress', revealDisplay.toFixed(4));
+      // Also set on the section itself (an ancestor of the label, unlike
+      // revealEl which is only its sibling) so the letter spans above
+      // can inherit the same live value and assemble in step with it.
+      if(revealSection) revealSection.style.setProperty('--reveal-progress', revealDisplay.toFixed(4));
+
+      var dpr = window.devicePixelRatio || 1;
+      var y = Math.round((currentScrollY - pullOffset) * dpr) / dpr;
+      scrollContainer.style.transform = 'translate3d(0,' + (-y).toFixed(2) + 'px,0)';
+
+      if(window.__updateProgressVars) window.__updateProgressVars();
+      updateMediaParallax();
+
+      if(currentScrollY !== targetScrollY || pullOffset !== pullOffsetTarget || revealDisplay !== revealProgress){
+        raf = requestAnimationFrame(animate);
+      } else {
+        raf = null; last = 0;
+      }
+    }
+
+    window.addEventListener('wheel', function(e){
+      e.preventDefault();
+      handleScrollInput(e.deltaY);
+      kick();
+    }, { passive: false });
+
+    var touchY = 0, touchVelocity = 0, touchLastT = 0;
+    window.addEventListener('touchstart', function(e){
+      if(e.touches.length !== 1) return;
+      touchY = e.touches[0].clientY;
+      pullStartY = touchY;
+      pulling = currentScrollY <= 0.5;
+      reloadTriggered = false;
+      touchVelocity = 0;
+      touchLastT = performance.now();
+    }, { passive: true });
+
+    window.addEventListener('touchmove', function(e){
+      if(!e.touches.length) return;
+      var y = e.touches[0].clientY;
+
+      if(pulling){
+        if(reloadTriggered){ if(e.cancelable) e.preventDefault(); return; }
+        var raw = y - pullStartY; // positive = finger dragged down
+        if(raw <= 0){
+          pulling = false; // finger reversed upward: hand off to normal scrolling below
+        } else {
+          if(e.cancelable) e.preventDefault();
+          pullOffsetTarget = Math.min(PULL_MAX, raw * PULL_RESISTANCE);
+          kick();
+          if(raw >= PULL_THRESHOLD){
+            reloadTriggered = true;
+            setTimeout(function(){ window.location.reload(); }, 80);
+          }
+          touchY = y;
+          return;
+        }
+      }
+
+      var now = performance.now();
+      var dt = Math.max(1, now - touchLastT);
+      var deltaY = (touchY - y) * TOUCH_GAIN;
+      touchVelocity = touchVelocity * 0.7 + (deltaY / dt) * 0.3; // smoothed release velocity, gained-px/ms
+      touchLastT = now;
+      handleScrollInput(deltaY);
+      touchY = y;
+      if(e.cancelable) e.preventDefault();
+      kick();
+    }, { passive: false });
+
+    function touchEnd(){
+      if(pulling && !reloadTriggered){
+        pullOffsetTarget = 0; // spring back
+      } else if(!pulling){
+        var v = (performance.now() - touchLastT > 80) ? 0 : touchVelocity; // finger rested before lifting: no fling
+        if(Math.abs(v) > FLING_MIN) handleScrollInput(Math.max(-FLING_MAX, Math.min(FLING_MAX, v * FLING_MS)));
+      }
+      pulling = false;
+      kick();
+    }
+    window.addEventListener('touchend', touchEnd, { passive: true });
+    window.addEventListener('touchcancel', touchEnd, { passive: true });
+
+    // Keyboard scrolling (space/page/arrow/home/end) so the page stays
+    // navigable without a wheel or touch surface.
+    window.addEventListener('keydown', function(e){
+      var vh = window.innerHeight;
+      var step = null;
+      switch(e.key){
+        case 'ArrowDown': step = 80; break;
+        case 'ArrowUp': step = -80; break;
+        case 'PageDown': step = vh * 0.9; break;
+        case 'PageUp': step = -vh * 0.9; break;
+        case ' ': step = e.shiftKey ? -vh * 0.9 : vh * 0.9; break;
+        case 'Home': targetScrollY = 0; kick(); return;
+        case 'End': targetScrollY = maxScroll; kick(); return;
+        default: return;
+      }
+      if(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+      e.preventDefault();
+      handleScrollInput(step);
+      kick();
+    }, { passive: false });
+
+    // Internal anchor links (#top, #services, ...) jump by moving the
+    // target scroll position instead of relying on native anchor scroll.
+    document.addEventListener('click', function(e){
+      var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+      if(!a) return;
+      var id = a.getAttribute('href').slice(1);
+      if(!id) return;
+      var target = document.getElementById(id);
+      if(!target) return;
+      e.preventDefault();
+      var rect = target.getBoundingClientRect();
+      targetScrollY = clamp(currentScrollY + rect.top, 0, maxScroll);
+      kick();
+    });
+
+    window.addEventListener('resize', calculateDimensions);
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(calculateDimensions); }
+    window.addEventListener('load', calculateDimensions);
+
+    calculateDimensions();
+    kick();
+  })();
+</script>
+
+</body>
+</html>
